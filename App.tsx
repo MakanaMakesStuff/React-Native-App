@@ -1,67 +1,76 @@
+import { ScrollView, StyleSheet, Text } from "react-native";
+import Timer from "./components/Timer";
 import { useState } from "react";
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
-export interface ProductI {
-  key: string;
-  label: string;
-}
-
-const DATA = Array.from({ length: 30 }).map(
-  (_, i) => ({ key: `${i}`, label: `Product ${i + 1}` } as ProductI)
-);
-
-function Product({ item }: { item: ProductI }) {
-  const [selected, setSelected] = useState<boolean>(false);
-
-  return (
-    <Pressable
-      onPressIn={() => setSelected(true)}
-      onPressOut={() => setSelected(false)}
-    >
-      <Text style={selected ? styles.productSelected : styles.product}>
-        {item.label}
-      </Text>
-    </Pressable>
-  );
-}
+import { HFlex, VFlex } from "./components/Flex";
+import Button from "./components/Button";
 
 export default function App() {
+  const [timers, setTimers] = useState([{ id: 1 }]);
+
+  const addTimer = () => {
+    setTimers((prev) => [
+      ...prev,
+      { id: prev.length ? prev[prev.length - 1].id + 1 : 1 },
+    ]);
+  };
+
+  const removeTimer = (id: number) => {
+    setTimers((prev) => prev.filter((t) => t.id !== id));
+  };
+
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={DATA}
-        renderItem={(item) => <Product item={item.item} />}
-        keyExtractor={(item) => item.key}
-      />
-    </View>
+    <VFlex style={style.container}>
+      <Text style={style.title}>My Timers</Text>
+
+      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ gap: 10 }}>
+        {timers?.length > 0 ? (
+          timers.map((t) => (
+            <Timer callback={() => removeTimer(t.id)} key={t.id} />
+          ))
+        ) : (
+          <Text
+            style={{
+              flex: 1,
+              width: "100%",
+              textAlign: "center",
+              padding: 20,
+            }}
+          >
+            No timers created
+          </Text>
+        )}
+      </ScrollView>
+
+      <HFlex
+        style={{
+          width: "100%",
+        }}
+      >
+        <Button
+          onPress={() => addTimer()}
+          style={{
+            backgroundColor: "crimson",
+          }}
+          textStyle={{
+            color: "white",
+          }}
+        >
+          Add Timer +
+        </Button>
+      </HFlex>
+    </VFlex>
   );
 }
 
-const styles = StyleSheet.create({
+const style = StyleSheet.create({
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
   container: {
     flex: 1,
-  },
-  product: {
-    backgroundColor: "#f3f3f3ff",
-    color: "#000",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 2,
-    borderBottomColor: "#dfdfdfff",
-  },
-  productSelected: {
-    backgroundColor: "#c2c2c2ff",
-    color: "#ffffffff",
-    fontWeight: "bold",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 2,
-    borderBottomColor: "#dfdfdfff",
+    padding: 20,
+    backgroundColor: "#fff",
+    gap: 10,
   },
 });
